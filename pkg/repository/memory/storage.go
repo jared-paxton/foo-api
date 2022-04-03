@@ -32,4 +32,7 @@ func (mem *storage) GetFoo(id string) (models.Foo, error) {
 	return foo, repository.ErrFooNotFound
 }
 
-
+func (mem *storage) CreateFoo(foo models.Foo) error {
+	mem.foos[foo.ID] = foo
+	return nil
+}

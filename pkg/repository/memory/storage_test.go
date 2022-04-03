@@ -10,6 +10,21 @@ import (
 func TestGetFoo(t *testing.T) {
 	storage := NewStorage()
 
+	foos := addTestData(storage)
+
+	for _, foo := range foos {
+		fetchedFoo, err := storage.GetFoo(foo.ID)
+		if err != nil {
+			t.Error("expected no error, but got:", err)
+		}
+		if !fetchedFoo.Equals(&foo) {
+			t.Errorf("foo name (%s) and/or ID (%s) was not equal to fetchedFoo name (%s) and/or ID (%s)\n",
+				foo.Name, foo.ID, fetchedFoo.Name, fetchedFoo.ID)
+		}
+	}
+}
+
+func addTestData(memStorage *storage) []models.Foo {
 	foos := []models.Foo{
 		{
 			ID:   uuid.NewString(),
@@ -26,17 +41,8 @@ func TestGetFoo(t *testing.T) {
 	}
 
 	for _, foo := range foos {
-		storage.foos[foo.ID] = foo
+		memStorage.foos[foo.ID] = foo
 	}
 
-	for _, foo := range foos {
-		fetchedFoo, err := storage.GetFoo(foo.ID)
-		if err != nil {
-			t.Error("expected no error, but got:", err)
-		}
-		if !fetchedFoo.Equals(&foo) {
-			t.Errorf("foo name (%s) and/or ID (%s) was not equal to fetchedFoo name (%s) and/or ID (%s)\n",
-				foo.Name, foo.ID, fetchedFoo.Name, fetchedFoo.ID)
-		}
-	}
+	return foos
 }

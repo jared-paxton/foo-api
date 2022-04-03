@@ -3,19 +3,23 @@
 package foo
 
 import (
+	"github.com/google/uuid"
 	"github.com/jared-paxton/foo-api/pkg/models"
+	"github.com/jared-paxton/foo-api/pkg/repository"
 )
 
 // Repository defines an interface that must be implemented
 // by any data storage system that interacts with Foo objects.
 type Repository interface {
 	GetFoo(id string) (models.Foo, error)
+	CreateFoo(models.Foo) error
 }
 
 // Service defines an interface to handle the business logic
 // for Foo objects.
 type Service interface {
 	Get(id string) (models.Foo, error)
+	New(name string) (models.Foo, error)
 }
 
 type service struct {
@@ -38,4 +42,21 @@ func (fs *service) Get(id string) (models.Foo, error) {
 	}
 
 	return foo, nil
+}
+
+func (fs *service) New(name string) (models.Foo, error) {
+	newFoo := models.Foo{
+		ID:   uuid.NewString(),
+		Name: name,
+	}
+
+	// Check if there is another Foo in storage with the same UUID
+	// (highly unlikely). An error is expected here.
+	_, err := fs.repo.GetFoo(newFoo.ID)
+	if err != repository.ErrFooNotFound {
+		return newFoo, err
+	}
+
+	fs.repo.CreateFoo(newFoo)
+	return newFoo, nil
 }
