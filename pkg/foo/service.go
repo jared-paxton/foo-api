@@ -13,6 +13,7 @@ import (
 type Repository interface {
 	GetFoo(id string) (models.Foo, error)
 	CreateFoo(models.Foo) error
+	DeleteFoo(id string) error
 }
 
 // Service defines an interface to handle the business logic
@@ -20,6 +21,7 @@ type Repository interface {
 type Service interface {
 	Get(id string) (models.Foo, error)
 	New(name string) (models.Foo, error)
+	Remove(id string) error
 }
 
 type service struct {
@@ -34,7 +36,8 @@ func NewFooService(r Repository) Service {
 	}
 }
 
-// Get fetches the Foo object with the given unique id.
+// Get fetches the Foo object with the given unique id
+// from storage, and returns an error if it's not found.
 func (fs *service) Get(id string) (models.Foo, error) {
 	foo, err := fs.repo.GetFoo(id)
 	if err != nil {
@@ -44,6 +47,8 @@ func (fs *service) Get(id string) (models.Foo, error) {
 	return foo, nil
 }
 
+// New create a new Foo object with the given name and generates
+// a UUID for the id. It then stores it, or returns an error.
 func (fs *service) New(name string) (models.Foo, error) {
 	newFoo := models.Foo{
 		ID:   uuid.NewString(),
@@ -59,4 +64,16 @@ func (fs *service) New(name string) (models.Foo, error) {
 
 	fs.repo.CreateFoo(newFoo)
 	return newFoo, nil
+}
+
+// Remove checks storage for the Foo object given the id. It deletes
+// it if found, or returns an error.
+func (fs *service) Remove(id string) error {
+	_, err := fs.repo.GetFoo(id)
+	if err != nil {
+		return err
+	}
+
+	fs.repo.DeleteFoo(id)
+	return nil
 }

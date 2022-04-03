@@ -52,9 +52,13 @@ func (ms *mockStorage) CreateFoo(models.Foo) error {
 	return nil
 }
 
+func (ms *mockStorage) DeleteFoo(id string) error {
+	return nil
+}
+
 func TestGet(t *testing.T) {
 	mockStorage := initMockStorage()
-	mockService := NewFooService(mockStorage)
+	mockFooService := NewFooService(mockStorage)
 
 	tests := []struct {
 		name  string
@@ -85,10 +89,10 @@ func TestGet(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			_, err := mockService.Get(test.fooID)
+			_, err := mockFooService.Get(test.fooID)
 
 			if err != test.want {
-				t.Errorf("test: %v failed - errors not the same. got: %v, wanted: %v\n", test.name, err, test.want)
+				t.Errorf("test failed: %v - errors not the same. got: %v, wanted: %v\n", test.name, err, test.want)
 			}
 		})
 	}
@@ -96,7 +100,7 @@ func TestGet(t *testing.T) {
 
 func TestNew(t *testing.T) {
 	mockStorage := initMockStorage()
-	mockService := NewFooService(mockStorage)
+	mockFooService := NewFooService(mockStorage)
 
 	fooName := "testName"
 
@@ -130,13 +134,13 @@ func TestNew(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			newFoo, err := mockService.New(test.fooName)
+			newFoo, err := mockFooService.New(test.fooName)
 
 			if err != test.wantErr {
-				t.Errorf("test: %v failed - should not have gotten an error (%s)\n", test.name, err)
+				t.Errorf("test failed: %v - should not have gotten this error: %s\n", test.name, err)
 			}
 			if newFoo.Name != test.wantFooName {
-				t.Errorf("test: %v failed - should not have gotten an error (%s)\n", test.name, err)
+				t.Errorf("test failed: %v - new Foo name (%s) was not the same as wanted Foo name (%s)\n", test.name, newFoo.Name, test.wantFooName)
 			}
 
 			generatedIDs = append(generatedIDs, newFoo.ID)
@@ -144,7 +148,44 @@ func TestNew(t *testing.T) {
 	}
 
 	if !areIDsUnique(generatedIDs) {
-		t.Error("test: generated IDs should be unique, but they are not.")
+		t.Error("test failed: generated IDs should be unique, but they are not.")
+	}
+}
+
+func TestRemove(t *testing.T) {
+	mockStorage := initMockStorage()
+	mockFooService := NewFooService(mockStorage)
+
+	tests := []struct {
+		name  string
+		fooID string
+		want  error
+	}{
+		{
+			name:  "should delete foo successfully",
+			fooID: testFoos[0].ID,
+			want:  nil,
+		},
+		{
+			name:  "should not delete foo since it doesn't exist",
+			fooID: "blahblahblah",
+			want:  repository.ErrFooNotFound,
+		},
+		{
+			name:  "should delete the last foo successfully",
+			fooID: testFooIDs[1],
+			want:  nil,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			err := mockFooService.Remove(test.fooID)
+
+			if err != test.want {
+				t.Errorf("test failed: %v - should not have gotten this error: %s - for id: %s\n", test.name, err, test.fooID)
+			}
+		})
 	}
 }
 
