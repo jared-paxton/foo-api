@@ -13,7 +13,7 @@ func (app *application) routes() http.Handler {
 
 	router.Get("/foo/{id}", app.fetchFoo)
 	router.Post("/foo", app.addFoo)
-    router.Delete("/foo/{id}", app.deleteFoo)
+	router.Delete("/foo/{id}", app.deleteFoo)
 
 	return router
 }
