@@ -11,7 +11,8 @@ import (
 func (app *application) routes() http.Handler {
 	router := chi.NewRouter()
 
-	router.Get("/foo/{id}", app.getFoo)
+	router.Get("/foo/{id}", app.fetchFoo)
+	router.Post("/foo", app.addFoo)
 
 	return router
 }
