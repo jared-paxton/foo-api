@@ -22,4 +22,5 @@ var ErrFooDuplicateID error = errors.New("foo with the same generated ID exists.
 type Storage interface {
 	GetFoo(id string) (models.Foo, error)
 	CreateFoo(models.Foo) error
+	DeleteFoo(id string) error
 }

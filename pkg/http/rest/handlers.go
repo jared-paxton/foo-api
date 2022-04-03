@@ -29,7 +29,7 @@ func (app *application) addFoo(w http.ResponseWriter, r *http.Request) {
 	var fooReq FooRequest
 	err := decoder.Decode(&fooReq)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		sendError(w, err)
 		return
 	}
 
@@ -43,4 +43,16 @@ func (app *application) addFoo(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		app.logger.Println("could not send response to addFoo request")
 	}
+}
+
+func (app *application) deleteFoo(w http.ResponseWriter, r *http.Request) {
+	fooID := chi.URLParam(r, "id")
+
+	err := app.fooService.Remove(fooID)
+	if err != nil {
+		sendError(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }

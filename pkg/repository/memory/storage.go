@@ -32,7 +32,15 @@ func (mem *storage) GetFoo(id string) (models.Foo, error) {
 	return foo, repository.ErrFooNotFound
 }
 
+// CreateFoo adds the given Foo object to memory.
 func (mem *storage) CreateFoo(foo models.Foo) error {
 	mem.foos[foo.ID] = foo
+	return nil
+}
+
+// DeleteFoo removes the foo object with the given ID
+// from memory.
+func (mem *storage) DeleteFoo(id string) error {
+	delete(mem.foos, id)
 	return nil
 }
